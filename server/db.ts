@@ -1,6 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/tidb-serverless";
-import { connect } from "@tidbcloud/serverless";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import {
   generatedLetters,
   type GeneratedLetter,
@@ -11,30 +11,30 @@ import {
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
-// On génère une instance fraîche du client HTTP à chaque appel si nécessaire
+// Client PostgreSQL optimisé pour Vercel (max 1 connexion par Lambda)
+let _db: ReturnType<typeof drizzle> | null = null;
+
 export async function getDb() {
-  const connectionString = process.env.DATABASE_URL;
+  if (!_db) {
+    const connectionString = process.env.DATABASE_URL;
 
-  if (!connectionString) {
-    console.error("[Database] FATAL: DATABASE_URL is not defined!");
-    return null;
+    if (!connectionString) {
+      console.error("[Database] FATAL: DATABASE_URL is not defined!");
+      return null;
+    }
+
+    try {
+      const client = postgres(connectionString, { max: 1, prepare: false });
+      _db = drizzle(client);
+    } catch (error) {
+      console.error(
+        "[Database] FATAL CONNECTION ERROR:",
+        error instanceof Error ? error.message : String(error)
+      );
+      return null;
+    }
   }
-
-  try {
-    // S'assurer que l'URL commence par https:// pour le driver serverless HTTP
-    const formattedUrl = connectionString.startsWith("mysql://")
-      ? connectionString.replace("mysql://", "https://")
-      : connectionString;
-
-    const client = connect({ url: formattedUrl });
-    return drizzle(client);
-  } catch (error) {
-    console.error(
-      "[Database] FATAL CONNECTION ERROR:",
-      error instanceof Error ? error.message : String(error)
-    );
-    return null;
-  }
+  return _db;
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -92,9 +92,14 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    // Adapté Postgres : `onConflictDoUpdate` au lieu de `onDuplicateKeyUpdate`
+    await db
+      .insert(users)
+      .values(values)
+      .onConflictDoUpdate({
+        target: users.openId,
+        set: updateSet,
+      });
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
@@ -142,16 +147,20 @@ export async function saveProcedure(userId: number, procedureKey: string) {
     )
     .limit(1);
   if (existing.length > 0) return existing[0];
+
+  // Adapté Postgres : `.returning()` pour récupérer l'ID généré
   const [result] = await db
     .insert(savedProcedures)
-    .values({ userId, procedureKey, completedSteps: [] });
+    .values({ userId, procedureKey, completedSteps: [] })
+    .returning();
+
   return {
-    id: result.insertId,
+    id: result.id,
     userId,
     procedureKey,
     completedSteps: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
   };
 }
 
@@ -192,13 +201,19 @@ export async function createTask(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const [result] = await db.insert(userTasks).values({ userId, ...input });
+
+  // Adapté Postgres : `.returning()`
+  const [result] = await db
+    .insert(userTasks)
+    .values({ userId, ...input })
+    .returning();
+
   return {
-    id: result.insertId,
+    id: result.id,
     userId,
-    status: "todo" as const,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    status: result.status,
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
     ...input,
   };
 }
@@ -249,11 +264,14 @@ export async function createLetter(
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const [result] = await db.insert(generatedLetters).values({
-    userId,
-    ...input,
-  });
-  return { id: result.insertId, userId, createdAt: new Date(), ...input };
+
+  // Adapté Postgres : `.returning()`
+  const [result] = await db
+    .insert(generatedLetters)
+    .values({ userId, ...input })
+    .returning();
+
+  return { id: result.id, userId, createdAt: result.createdAt, ...input };
 }
 
 // --- User profile ---
