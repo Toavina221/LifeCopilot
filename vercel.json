@@ -14,4 +14,3 @@
     { "source": "/(.*)", "destination": "/$1" }
   ]
 }
-//bla
