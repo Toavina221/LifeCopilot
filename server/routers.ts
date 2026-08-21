@@ -113,7 +113,7 @@ export const appRouter = router({
     }),
   }),
 
-  /** Age-adaptive AI chat assistant (streaming). */
+ /** Age-adaptive AI chat assistant (streaming). */
   chat: router({
     complete: publicProcedure
       .input(
@@ -132,12 +132,20 @@ export const appRouter = router({
         const system = baseSystemPrompt(input.mode, input.procedureKey);
         let content: string;
         try {
-          content = await aiChat({
-            messages: [
-              { role: "system", content: system },
-              ...input.messages.map((m) => ({ role: m.role, content: m.content })),
-            ],
-          });
+          // Timeout de 10s max pour éviter le 504 Vercel
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout IA")), 10000)
+          );
+
+          content = await Promise.race([
+            aiChat({
+              messages: [
+                { role: "system", content: system },
+                ...input.messages.map((m) => ({ role: m.role, content: m.content })),
+              ],
+            }),
+            timeoutPromise,
+          ]);
         } catch (e) {
           console.error("[Chat] AI failure:", e);
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: FALLBACK_ERROR });
