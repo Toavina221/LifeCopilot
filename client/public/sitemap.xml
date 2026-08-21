@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Pages principales -->
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/procedures</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/assistant</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/lettres</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/arnaques</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pages légales -->
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/mentions-legales</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/confidentialite</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://life-copilot-tan.vercel.app/cgu</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Démarches guidées (25) -->
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/health-rdv-medecin</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/health-remboursement-sante</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/health-declarer-naissance</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/health-carte-mutuelle</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/finance-ouvrir-compte-bancaire</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/finance-budget-mensuel</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/finance-contester-facture</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/finance-dossier-aide-financiere</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/finance-dossier-pret</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/housing-cherche-logement</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/housing-signer-bail</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/housing-etat-des-lieux</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/housing-probleme-logement</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/school-choix-etablissement</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/school-bourse-scolarite</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/school-parents-eleves</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/school-reorientation</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-securiser-comptes</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-reclamer-donnees</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-abonnement-resilier</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-signaler-arnaque</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-premiere-carte</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-premiers-pas-numeriques</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-senior-visio-sante</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://life-copilot-tan.vercel.app/procedures/digital-heritage-numerique</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>
