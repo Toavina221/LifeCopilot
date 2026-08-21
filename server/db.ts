@@ -11,33 +11,30 @@ import {
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
-type DrizzleDb = ReturnType<typeof drizzle>;
-let _db: any = null;
-
+// On génère une instance fraîche du client HTTP à chaque appel si nécessaire
 export async function getDb() {
-  if (!_db) {
-    if (!process.env.DATABASE_URL) {
-      console.error("[Database] FATAL: DATABASE_URL is not defined!");
-      return null;
-    }
+  const connectionString = process.env.DATABASE_URL;
 
-    try {
-      console.log("[Database] Connecting via TiDB HTTP Driver (Serverless optimized)...");
-      
-      const client = connect({
-        url: process.env.DATABASE_URL,
-      });
-
-      // Use drizzle with the HTTP client as a proxy
-      _db = drizzle(client as any);
-      
-      console.log("[Database] TiDB HTTP Client initialized.");
-    } catch (error) {
-      console.error("[Database] FATAL CONNECTION ERROR:", error instanceof Error ? error.message : String(error));
-      return null;
-    }
+  if (!connectionString) {
+    console.error("[Database] FATAL: DATABASE_URL is not defined!");
+    return null;
   }
-  return _db;
+
+  try {
+    // S'assurer que l'URL commence par https:// pour le driver serverless HTTP
+    const formattedUrl = connectionString.startsWith("mysql://")
+      ? connectionString.replace("mysql://", "https://")
+      : connectionString;
+
+    const client = connect({ url: formattedUrl });
+    return drizzle(client);
+  } catch (error) {
+    console.error(
+      "[Database] FATAL CONNECTION ERROR:",
+      error instanceof Error ? error.message : String(error)
+    );
+    return null;
+  }
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
@@ -56,7 +53,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     const updateSet: Record<string, any> = {};
 
     const textFields = ["name", "email", "loginMethod", "country"] as const;
-    
+
     textFields.forEach((field) => {
       const value = (user as any)[field];
       if (value !== undefined) {
@@ -111,7 +108,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -121,7 +122,10 @@ export async function getUserByOpenId(openId: string) {
 export async function listSavedProcedures(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(savedProcedures).where(eq(savedProcedures.userId, userId));
+  return db
+    .select()
+    .from(savedProcedures)
+    .where(eq(savedProcedures.userId, userId));
 }
 
 export async function saveProcedure(userId: number, procedureKey: string) {
@@ -131,14 +135,24 @@ export async function saveProcedure(userId: number, procedureKey: string) {
     .select()
     .from(savedProcedures)
     .where(
-      and(eq(savedProcedures.userId, userId), eq(savedProcedures.procedureKey, procedureKey))
+      and(
+        eq(savedProcedures.userId, userId),
+        eq(savedProcedures.procedureKey, procedureKey)
+      )
     )
     .limit(1);
   if (existing.length > 0) return existing[0];
   const [result] = await db
     .insert(savedProcedures)
     .values({ userId, procedureKey, completedSteps: [] });
-  return { id: result.insertId, userId, procedureKey, completedSteps: [], createdAt: new Date(), updatedAt: new Date() };
+  return {
+    id: result.insertId,
+    userId,
+    procedureKey,
+    completedSteps: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 }
 
 export async function markProcedureSteps(
@@ -152,7 +166,10 @@ export async function markProcedureSteps(
     .update(savedProcedures)
     .set({ completedSteps })
     .where(
-      and(eq(savedProcedures.userId, userId), eq(savedProcedures.procedureKey, procedureKey))
+      and(
+        eq(savedProcedures.userId, userId),
+        eq(savedProcedures.procedureKey, procedureKey)
+      )
     );
   return { success: true };
 }
@@ -162,14 +179,28 @@ export async function markProcedureSteps(
 export async function listTasks(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(userTasks).where(eq(userTasks.userId, userId)).orderBy(desc(userTasks.createdAt));
+  return db
+    .select()
+    .from(userTasks)
+    .where(eq(userTasks.userId, userId))
+    .orderBy(desc(userTasks.createdAt));
 }
 
-export async function createTask(userId: number, input: { title: string; description?: string; deadlineAt?: number }) {
+export async function createTask(
+  userId: number,
+  input: { title: string; description?: string; deadlineAt?: number }
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   const [result] = await db.insert(userTasks).values({ userId, ...input });
-  return { id: result.insertId, userId, status: "todo" as const, createdAt: new Date(), updatedAt: new Date(), ...input };
+  return {
+    id: result.insertId,
+    userId,
+    status: "todo" as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...input,
+  };
 }
 
 export async function updateTaskStatus(
@@ -200,7 +231,11 @@ export async function deleteTask(userId: number, taskId: number) {
 export async function listLetters(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(generatedLetters).where(eq(generatedLetters.userId, userId)).orderBy(desc(generatedLetters.createdAt));
+  return db
+    .select()
+    .from(generatedLetters)
+    .where(eq(generatedLetters.userId, userId))
+    .orderBy(desc(generatedLetters.createdAt));
 }
 
 export async function createLetter(
@@ -225,7 +260,11 @@ export async function createLetter(
 
 export async function updateUserProfile(
   userId: number,
-  input: { name?: string; ageGroup?: "junior" | "teen" | "adult" | "senior"; country?: string }
+  input: {
+    name?: string;
+    ageGroup?: "junior" | "teen" | "adult" | "senior";
+    country?: string;
+  }
 ) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -240,6 +279,10 @@ export async function updateUserProfile(
 export async function getUserById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
